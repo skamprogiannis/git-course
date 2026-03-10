@@ -5,7 +5,7 @@
 First of all we clone this mostly empty repository from Gitea. We then create the work
 subdirectory as requested.
 
-- mkdir work
+- `mkdir work`
 
 
 ### Task 01: Setting Up Git
@@ -15,26 +15,26 @@ file with what would be expected I did on a fresh reboot on a Zone01 computer.
 
 ### Task 02: Git commits to commit
 
-- mkdir hello
-- touch hello.sh
-- echo "Hello, World" > hello.sh
-- git init
+- `mkdir hello`
+- `touch hello.sh`
+- `echo "Hello, World" > hello.sh`
+- `git init`
 
 At this point git informed me that it set up the initial branch as "master" and I decided I would
 have to change it to main and also change my defaults.
 
-- git config --global init.defaultBranch main
-- git branch -m main
-- git branch --show-current
-- git status
+- `git config --global init.defaultBranch main`
+- `git branch -m main`
+- `git branch --show-current`
+- `git status`
 
 Satisfied with the name change I move on to the next part of the exercise, making our hello world
 script modular.
 
-- echo '#!/bin/bash' > hello.sh
-- echo 'Hello, $1' >> hello.sh
-- bash hello.sh everynyan
-- git commit -m "feat(hello): add a modular hello bash script
+- `echo '#!/bin/bash' > hello.sh`
+- `echo 'Hello, $1' >> hello.sh`
+- `bash hello.sh everynyan`
+- `git commit -m "feat(hello): add a modular hello bash script`
 
 I modified hello.sh in neovim so that it looked like:
 
@@ -49,12 +49,12 @@ echo "Hello, $name"
 We are asked to stage the file, which means we can't make two separate modifications and commit
 each one separately but we need to create two separate commits.
 
-- git add .
+- `git add .`
 
 I tried partially commiting with git commit -p but it did not work as I hoped. It appears there is
 no escaping having to reset.
 
-- git reset -p hello.sh
+- `git reset -p hello.sh`
 
 It's all one hunk and s (for split) does not work as the changes are too close together.
 *Sorry, cannot split this hunk*
@@ -62,9 +62,9 @@ It's all one hunk and s (for split) does not work as the changes are too close t
 We have to manually edit the code we want to unstage with e (edit) and replace the + at the start
 of the lines we don't want to commit with ' ' (for context).
 
-- git commit -m "docs(hello): add comment for default name value"
-- git add hello.sh
-- git commit -m "refactor(hello): use named variable with default value fallback"
+- `git commit -m "docs(hello): add comment for default name value"`
+- `git add hello.sh`
+- `git commit -m "refactor(hello): use named variable with default value fallback"`
 
 At this point I re-read the incredibly confusing:
 
@@ -84,64 +84,120 @@ history and change the directory structure.
 
 I will create a temporary branch with the first commit I was supposed to have and rebase main.
 
-- git switch --orphan temp-root
-- echo "Hello, World" > hello.sh
-- git add hello.sh
-- git commit -m "feat(hello): initial hello world script"
-- git switch main
-- git rebase temp-root
-- vim hello.sh
-- git branch -d temp-root
+- `git switch --orphan temp-root`
+- `echo "Hello, World" > hello.sh`
+- `git add hello.sh`
+- `git commit -m "feat(hello): initial hello world script"`
+- `git switch main`
+- `git rebase temp-root`
+- `vim hello.sh`
+- `git branch -d temp-root`
 
 
 We change the file so that it keeps only the state we want at the second commit.
 
-- git add hello.sh
-- git rebase --continue
+- `git add hello.sh`
+- `git rebase --continue`
 
 As I had originally created a repository on Gitea called git, (as we usually do with projects for
 zone01) I had to restructure the directories to follow the expected format. The instructions to
 initialize git inside the hello directory but submit a directory called git/ seem needlessly
 confusing.
 
-- cd ..
-- vim 01_setting_up_git.sh
-- vim 02_git_commits_to_commit.sh
-- git add .
-- git commit -m "docs(work): add encapsulated solution scripts for tasks 1 and 2"
+- `cd ..`
+- `vim 01_setting_up_git.sh`
+- `vim 02_git_commits_to_commit.sh`
+- `git add .`
+- `git commit -m "docs(work): add encapsulated solution scripts for tasks 1 and 2"`
 
 ### Task 03: History
 
-- git log
-- git log --oneline
-- git log -n 2
-- git log --since="5 minutes ago"
-- git log --graph --pretty=format:'* %h %ad | %s%d [%an]' --date=short
+- `git log`
+- `git log --oneline`
+- `git log -n 2`
+- `git log --since="5 minutes ago"`
+- `git log --graph --pretty=format:'* %h %ad | %s%d [%an]' --date=short`
 
 We create a .sh file where these commands are saved.
 
-- vim 03_history.sh
-- git add .
-- git commit -m "docs(work): add encapsulated solution for history task"
-- git push
+- `vim 03_history.sh`
+- `git add .`
+- `git commit -m "docs(work): add encapsulated solution for history task"`
+- `git push`
 
 ### Task 04: Check it out
 
-- cd ~/repositories/zone01/git/work/hello
-- git reset HEAD~3
-- git reset --hard
-- cat hello.sh
+- `cd ~/repositories/zone01/git/work/hello`
+- `git reset HEAD~3`
+- `git reset --hard`
+- `cat hello.sh`
 
-Well, this is obviously what we were meant to do. I should have done checkout or switch instead.
-Nevertheless, this can be a learning exercise. We will use the git reflog to get our commits back.
+Well, this is obviously not what we were meant to do. I should have done checkout or switch
+instead. Nevertheless, this can be a learning exercise. We will use the git reflog to get
+our commits back.
 
-- git reset --hard f0cb236
-- git checkout HEAD~2
-- cat hello.sh
-- get switch main
-- cat hello.sh
-- git add . && git commit -m "docs(work): add encapsulated solution for check it out task"
+- `git reset --hard f0cb236`
+- `git checkout HEAD~2`
+- `cat hello.sh`
+- `get switch main`
+- `cat hello.sh`
+- `git add . && git commit -m "docs(work): add encapsulated solution for check it out task"`
 
 ### Task 05: TAG me
 
+This one is pretty straight-forward. We just add tags and switch to the tags like they were commit
+hashes.
+
+### Task 06: Changed your mind?
+
+```bash
+echo '#!/bin/bash
+
+# This is a bad comment. We want to revert it.
+name=${1:-"World"}
+
+echo "Hello, $name"' > hello.sh
+```
+- `git restore hello.sh`
+
+Now for the staged unwanted change:
+
+- `sed -i 's/# Default is "World"/# This is a bad comment/' hello.sh`
+- `git add hello.sh`
+- `git restore --staged hello.sh`
+- `git restore hello.sh`
+
+And for the commited change:
+
+- `sed -i 's/# Default is "World"/# This is an unwanted but commited change/' hello.sh`
+- `git reset --hard HEAD~1`
+
+When I tried to move on to the next part of the exercise I realized that I couldn't complete it
+properly as the exercise stupidly does not expect anyone to reset --hard but only to ever git 
+revert. I am going to get creative.
+
+- `git reflog`
+- `git cherry-pick 085f094`
+- `git tag oops`
+- `git checkout v1`
+- `git log --all --oneline`
+- `git tag -d oops`
+- `git reflog expire --expire=now --all`
+- `git gc --prune=now`
+
+We add the "Author: Jim Weirich" comment and commit.
+
+- `git add hello.sh`
+- `git commit -m "docs(hello): add author information"`
+```bash
+#!/bin/bash
+
+# Default is World
+# Author: Jim Weirich (jim@edgecase.com)
+name=${1:-"World"}
+
+echo "Hello, $name"
+```
+- `git add hello.sh`
+- `git commit --amend --no-edit`
 
