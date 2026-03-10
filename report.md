@@ -123,3 +123,25 @@ We create a .sh file where these commands are saved.
 - vim 03_history.sh
 - git add .
 - git commit -m "docs(work): add encapsulated solution for history task"
+- git push
+
+### Task 04: Check it out
+
+- cd ~/repositories/zone01/git/work/hello
+- git reset HEAD~3
+- git reset --hard
+- cat hello.sh
+
+Well, this is obviously what we were meant to do. I should have done checkout or switch instead.
+Nevertheless, this can be a learning exercise. We will use the git reflog to get our commits back.
+
+- git reset --hard f0cb236
+- git checkout HEAD~2
+- cat hello.sh
+- get switch main
+- cat hello.sh
+- git add . && git commit -m "docs(work): add encapsulated solution for check it out task"
+
+### Task 05: TAG me
+
+
