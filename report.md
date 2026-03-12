@@ -267,3 +267,39 @@ git cat-file -p $HELLO_BLOB
 - `git commit -m "docs(work): add encapsulated solution for blobs, trees and commits task"`
 
 ### Task 09: Branching and Merging
+
+We create a `greet` branch as a reference point, then do all the work on `main`.
+
+- `git branch -c greet`
+
+We add a `greeter.sh` library to `lib/` with a `Greeter()` function:
+
+```bash
+#!/bin/bash
+
+Greeter() {
+    who="$1"
+    echo "Hello, $who"
+}
+```
+
+- `git add lib/greeter.sh`
+- `git commit -m "feat: add greeter script"`
+
+We then refactor `hello.sh` to source and use the greeter function instead of inlining the logic:
+
+- `git add lib/hello.sh`
+- `git commit -m "refactor(hello): refactor hello.sh to use greeter.sh"`
+
+We add an intentionally useless comment to the Makefile as required by the exercise:
+
+- `sed -i '1i# Ensure it runs the updated lib/hello.sh file' Makefile`
+- `git add . && git commit -m "docs: add useless comment to Makefile"`
+
+We use `git diff greet` to review all changes made on `main` since the branch point.
+
+Finally we add a README and check the full graph:
+
+- `echo "This is the Hello World example from the git project." > README.md`
+- `git add . && git commit -m "docs: add README.md"`
+- `git log --all --oneline --graph --decorate`
