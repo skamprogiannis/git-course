@@ -201,3 +201,69 @@ echo "Hello, $name"
 - `git add hello.sh`
 - `git commit --amend --no-edit`
 
+### Task 07: Move it
+
+Working inside `work/hello`, we create the `lib/` directory and use `git mv` so the rename is tracked:
+
+- `mkdir lib`
+- `git mv hello.sh lib/`
+- `git commit -m "chore: move hello.sh to lib directory"`
+
+We then create a `Makefile` with a `run` target:
+
+```makefile
+TARGET="lib/hello.sh"
+
+run:
+	bash ${TARGET}
+```
+
+- `git add Makefile`
+- `git commit -m "feat: add Makefile to run hello script from lib"`
+
+We verify it works. Since `make` is not installed on this NixOS machine, we drop into a temporary shell:
+
+- `nix-shell -p gnumake`
+- `make run`  → outputs `Hello, World`
+
+Back in the repo root we stage the script file and amend the parent commit to give it a proper message:
+
+- `git add .`
+- `git commit --amend` → `docs(work): add encapsulated solution for move it task`
+- `git push`
+
+### Task 08: blobs, trees and commits
+
+This task explores git's internal object model using `git cat-file`.
+
+First we inspect the commit object itself:
+
+- `git cat-file -p HEAD`
+
+This shows the tree hash, parent, author, and committer. We then look at the tree it points to:
+
+- `git cat-file -p HEAD^{tree}`
+
+Output shows two entries — the `Makefile` blob and the `lib/` subtree. We can read the Makefile blob directly by its hash:
+
+- `git cat-file -p 407082da4bc68dba41102de9599b0a7c9def931b`
+
+We encapsulate the pattern for exploring the lib subtree and the `hello.sh` blob into a script:
+
+```bash
+# Identify the current tree
+git cat-file -p HEAD^{tree}
+
+# Explore the 'lib' subdirectory tree
+LIB_TREE=$(git ls-tree HEAD | grep 'lib' | awk '{print $3}')
+git cat-file -p $LIB_TREE
+
+# Read the content of hello.sh via its blob hash
+HELLO_BLOB=$(git ls-tree -r HEAD | grep 'hello.sh' | awk '{print $3}')
+git cat-file -p $HELLO_BLOB
+```
+
+- `git add 08_blobs_trees_and_commits.sh`
+- `git commit -m "docs(work): add encapsulated solution for blobs, trees and commits task"`
+
+### Task 09: Branching and Merging
