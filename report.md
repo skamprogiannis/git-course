@@ -303,3 +303,79 @@ Finally we add a README and check the full graph:
 - `echo "This is the Hello World example from the git project." > README.md`
 - `git add . && git commit -m "docs: add README.md"`
 - `git log --all --oneline --graph --decorate`
+
+### Task 10: Conflicts, Merging and Rebasing
+
+#### Merge Main into Greet Branch
+
+We switch to `greet` and merge `main` into it. Since `greet` had not diverged,
+this is a fast-forward — git simply advances the branch pointer.
+
+- `git switch greet`
+- `git merge main`
+
+#### Merging Main into Greet Branch (Conflict)
+
+Back on `main`, we overwrite `hello.sh` with an interactive version:
+
+```bash
+#!/bin/bash
+
+echo "What's your name"
+read my_name
+
+echo "Hello, $my_name"
+```
+
+- `git add . && git commit -m "feat: make hello.sh interactive"`
+
+We then switch back to `greet` and attempt to merge `main`:
+
+- `git switch greet`
+- `git merge main`
+
+No conflict arises. This is a flaw in the exercise: the instruction to merge
+`main` into `greet` at the start of this task eliminated any divergence. Since
+`greet` had no independent changes to `lib/hello.sh` after that first merge,
+the second merge was yet another fast-forward. A conflict requires both branches
+to have independently modified the same file since their common ancestor.
+
+#### Rebasing Greet Branch
+
+We go back to the point before the initial merge, resetting `greet` to where it
+was before the task began:
+
+- `git switch greet`
+- `git reset --hard 6b6187a`
+- `git rebase main`
+
+This replays any commits unique to `greet` on top of `main`'s latest commit,
+resulting in a linear history.
+
+#### Merging Greet into Main
+
+With `greet` rebased, we switch to `main` and merge:
+
+- `git switch main`
+- `git merge greet`
+
+Because `greet` is now a direct descendant of `main`'s HEAD (thanks to the
+rebase), this merge is a fast-forward and produces no merge commit.
+
+#### Understanding Fast-Forwarding and the Difference Between Merging and Rebasing
+
+**Fast-forwarding** happens when the branch you are merging into has not
+diverged from the branch being merged. Git does not need to reconcile two
+histories — it simply moves the branch pointer forward to the new commit. No
+merge commit is created and the history stays linear.
+
+**Merging** combines two diverged histories by creating a new merge commit that
+has two parents. The history of both branches is fully preserved, making it
+clear where the lines of development split and rejoined. This is safer for
+shared/public branches since it never rewrites existing commits.
+
+**Rebasing** moves (replays) the commits of one branch on top of another,
+rewriting their hashes in the process. The result is a clean linear history
+with no merge commits, as if the work had always been done on top of the latest
+changes. The trade-off is that rebasing rewrites history, which can cause
+problems if the branch has already been pushed and shared with others.
