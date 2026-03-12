@@ -423,3 +423,30 @@ Finally we add a second remote called `backup` and push both branches to it:
 The single command is `git pull`. It is a shorthand that combines `git fetch`
 (downloads new data from the remote) followed immediately by `git merge`
 (integrates those changes into the current branch).
+
+### Task 12: Bare Repositories
+
+A bare repository contains only the git object store with no working tree. It
+is the standard format for a shared remote that multiple developers push to and
+pull from.
+
+From `work/` we create a bare clone of `hello`:
+
+- `git clone --bare hello hello.git`
+
+We add it as a remote inside the original `hello` repo:
+
+- `git remote add shared ../hello.git`
+
+We update the README and push the commit to the shared bare repo:
+
+- `git add README.md && git commit -m "docs: update README for shared repo"`
+- `git push shared main`
+
+Finally, from `cloned_hello` we pull the new commit directly from the bare repo:
+
+- `git pull ../hello.git main`
+
+This demonstrates the typical workflow: a bare repo sits in the middle acting
+as the authoritative remote while working repos on either side push to and pull
+from it.
