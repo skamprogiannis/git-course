@@ -450,3 +450,59 @@ Finally, from `cloned_hello` we pull the new commit directly from the bare repo:
 This demonstrates the typical workflow: a bare repo sits in the middle acting
 as the authoritative remote while working repos on either side push to and pull
 from it.
+
+### Task 13: Merge Conflict Demo
+
+Task 10 failed to produce a conflict because the exercise instructed us to merge
+`main` into `greet` before making any diverging changes, leaving no independent
+history on `greet` to conflict with. This task demonstrates that we do
+understand how merge conflicts work by constructing a proper one.
+
+We create a new branch `conflict-demo` and modify `lib/hello.sh` to add a
+goodbye line:
+
+- `git switch -c conflict-demo`
+- edit `lib/hello.sh` → add `echo "Goodbye, $my_name"`
+- `git add lib/hello.sh && git commit -m "feat: add goodbye message to hello.sh"`
+
+Back on `main` we make a **different** change to the same line:
+
+- `git switch main`
+- edit `lib/hello.sh` → add `echo "Have a nice day, $my_name"`
+- `git add lib/hello.sh && git commit -m "feat: add pleasant farewell to hello.sh"`
+
+Now both branches have diverged on the same part of the file. Merging triggers
+a conflict:
+
+- `git merge conflict-demo`
+
+```
+CONFLICT (content): Merge conflict in lib/hello.sh
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+Git inserts conflict markers into the file:
+
+```
+<<<<<<< HEAD
+echo "Have a nice day, $my_name"
+=======
+echo "Goodbye, $my_name"
+>>>>>>> conflict-demo
+```
+
+We resolve manually by keeping both lines (accepting changes from both sides),
+removing the markers, then staging and committing:
+
+- `git add lib/hello.sh`
+- `git commit -m "fix: resolve merge conflict combining farewell messages"`
+
+The resulting graph shows a true merge commit with two parents:
+
+```
+*   d0a10ac (HEAD -> main) fix: resolve merge conflict combining farewell messages
+|\
+| * 286ab62 (conflict-demo) feat: add goodbye message to hello.sh
+* | b352bce feat: add pleasant farewell to hello.sh
+|/
+```
