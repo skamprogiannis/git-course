@@ -379,3 +379,47 @@ rewriting their hashes in the process. The result is a clean linear history
 with no merge commits, as if the work had always been done on top of the latest
 changes. The trade-off is that rebasing rewrites history, which can cause
 problems if the branch has already been pushed and shared with others.
+
+### Task 11: Local and Remote Repositories
+
+We clone the `hello` repo locally to simulate a remote workflow:
+
+- `git clone hello cloned_hello`
+- `cd cloned_hello`
+
+We inspect the clone to understand what was brought over:
+
+- `git log --oneline`
+- `git remote -v` — origin points to the local `hello` directory
+- `git branch -a` — shows local `main` and remote-tracking `origin/main`, `origin/greet`
+
+We then go back to the original `hello` repo and make a change:
+
+- `echo "(changed in the original)" >> README.md`
+- `git add README.md && git commit -m "docs: update README"`
+
+Back in `cloned_hello` we fetch the new commit without merging it yet:
+
+- `git fetch`
+- `git log --all --oneline --graph`
+
+The graph shows `origin/main` is now one commit ahead of our local `main`. We
+merge it in:
+
+- `git merge origin/main`
+
+We also set up a local tracking branch for the remote `greet` branch:
+
+- `git switch --track origin/greet`
+
+Finally we add a second remote called `backup` and push both branches to it:
+
+- `git remote add backup /home/stefan/repositories/zone01/git/work/hello`
+- `git push backup main`
+- `git push backup greet`
+
+#### Audit Question: Single command equivalent to fetch + merge
+
+The single command is `git pull`. It is a shorthand that combines `git fetch`
+(downloads new data from the remote) followed immediately by `git merge`
+(integrates those changes into the current branch).
