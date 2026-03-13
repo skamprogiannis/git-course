@@ -1,8 +1,6 @@
-source lib/greeter.sh
+#!/bin/bash
 
-name="$1"
-if [ -z "$name" ]; then
-    name="World"
-fi
+echo "What's your name"
+read my_name
 
-Greeter "$name"
+echo "Hello, $my_name"
