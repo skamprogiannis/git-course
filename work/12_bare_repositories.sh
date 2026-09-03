@@ -5,7 +5,7 @@
 git clone --bare hello hello.git
 
 # In the original repo, add the bare repo as a remote
-cd hello
+cd hello || exit 1
 git remote add shared ../hello.git
 
 # Make a change and push it to the shared bare repo
@@ -18,5 +18,5 @@ git add README.md && git commit -m "docs: update README for shared repo"
 git push shared main
 
 # From the clone, pull the new changes directly from the bare repo
-cd ../cloned_hello
+cd ../cloned_hello || exit 1
 git pull ../hello.git main

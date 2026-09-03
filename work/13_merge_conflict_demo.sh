@@ -1,7 +1,6 @@
 #!/bin/bash
 # Run from within work/hello
-# This task demonstrates a real merge conflict, which task 10 failed to produce
-# due to a flaw in the exercise sequencing (see report).
+# This supplemental task demonstrates a standalone merge-conflict workflow.
 
 # Create a new branch and modify hello.sh one way
 git switch -c conflict-demo

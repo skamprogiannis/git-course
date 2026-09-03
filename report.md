@@ -1,9 +1,9 @@
-# Git Project Report
+# Git Ready Project Report
 
 ## Task 00: Setting Up the Repo
 
-First of all we clone this mostly empty repository from Gitea. We then create the work
-subdirectory as requested.
+I cloned the starter repository from Gitea and created the required `work/`
+subdirectory.
 
 ```bash
 mkdir work
@@ -12,8 +12,8 @@ mkdir work
 
 ### Task 01: Setting Up Git
 
-No actions were taken as git was already installed on my machine. I later added a task01 bash
-file with what would be expected I did on a fresh reboot on a Zone01 computer.
+Git was already installed on my workstation. I recorded the identity and default-branch
+configuration required on a fresh Zone01 installation in the Task 01 shell file.
 
 ### Task 02: Git commits to commit
 
@@ -39,9 +39,10 @@ script modular.
 
 ```bash
 echo '#!/bin/bash' > hello.sh
-echo 'Hello, $1' >> hello.sh
+echo 'echo "Hello, $1"' >> hello.sh
 bash hello.sh everynyan
-git commit -m "feat(hello): add a modular hello bash script
+git add hello.sh
+git commit -m "feat(hello): add a modular hello bash script"
 ```
 
 I modified hello.sh in neovim so that it looked like:
@@ -61,15 +62,18 @@ each one separately but we need to create two separate commits.
 git add .
 ```
 
-I tried partially commiting with git commit -p but it did not work as I hoped. It appears there is
-no escaping having to reset.
+I tried partial staging with `git commit -p`, but the changes were still staged as a single hunk.
+I used `git reset -p` to edit the staged patch instead:
 
 ```bash
 git reset -p hello.sh
 ```
 
-It's all one hunk and s (for split) does not work as the changes are too close together.
-*Sorry, cannot split this hunk*
+The changes were close enough that Git could not split the hunk automatically:
+
+```text
+Sorry, cannot split this hunk
+```
 
 We have to manually edit the code we want to unstage with e (edit) and replace the + at the start
 of the lines we don't want to commit with ' ' (for context).
@@ -80,21 +84,19 @@ git add hello.sh
 git commit -m "refactor(hello): use named variable with default value fallback"
 ```
 
-At this point I re-read the incredibly confusing:
+At this point I revisited the submission structure in the subject:
 
 > To begin, create a work directory and organize all your tasks within it. Each exercise should
 be encapsulated in its own file, named after the corresponding task for clarity and ease of
 reference.
 
-So far I was just editing the hello.sh and reporting my work in this report.md file in the root
-directory. These instructions seem to want a separate bash file for every stage of the project.
-It's unfortunate but I consult the audit questions found online.
+So far I had edited `hello.sh` and documented the work in this report. The audit clarified that
+each stage also needed its own solution file:
 
 > The student must provide you with a file containing the solutions for each task.
 
-It appears I will indeed have to create several different .sh files. It also seems like I was
-expected to commit the very first bash file with the simple "Hello, World" echo. Time to re-write
-history and change the directory structure.
+I therefore added the task-specific shell files. I had also omitted the initial snapshot containing
+only `echo "Hello, World"`, so I repaired the exercise repository's history before continuing.
 
 I will create a temporary branch with the first commit I was supposed to have and rebase main.
 
@@ -117,10 +119,8 @@ git add hello.sh
 git rebase --continue
 ```
 
-As I had originally created a repository on Gitea called git, (as we usually do with projects for
-zone01) I had to restructure the directories to follow the expected format. The instructions to
-initialize git inside the hello directory but submit a directory called git/ seem needlessly
-confusing.
+Because the subject requires a nested `work/hello` repository inside the submitted project, I
+restructured the outer Gitea repository to preserve both the solution files and the inner exercise.
 
 ```bash
 cd ..
@@ -152,29 +152,26 @@ git push
 ### Task 04: Check it out
 
 ```bash
-cd ~/repositories/zone01/git/work/hello
+cd work/hello
 git reset HEAD~3
 git reset --hard
 cat hello.sh
 ```
 
-Well, this is obviously not what we were meant to do. I should have done checkout or switch
-instead. Nevertheless, this can be a learning exercise. We will use the git reflog to get
-our commits back.
+This reset was not the requested approach: the exercise called for checking out earlier snapshots.
+It became a useful recovery exercise, however, because the reflog allowed me to restore the commits.
 
 ```bash
 git reset --hard f0cb236
-git checkout HEAD~2
+git switch --detach HEAD~2
 cat hello.sh
-get switch main
+git switch main
 cat hello.sh
-git add . && git commit -m "docs(work): add encapsulated solution for check it out task"
 ```
 
 ### Task 05: TAG me
 
-This one is pretty straight-forward. We just add tags and switch to the tags like they were commit
-hashes.
+This task adds tags and checks out the snapshots they reference.
 
 ### Task 06: Changed your mind?
 
@@ -199,22 +196,23 @@ git restore --staged hello.sh
 git restore hello.sh
 ```
 
-And for the commited change:
+And for the committed change:
 
 ```bash
-sed -i 's/# Default is "World"/# This is an unwanted but commited change/' hello.sh
-git reset --hard HEAD~1
+sed -i 's/# Default is "World"/# This is an unwanted but committed change/' hello.sh
+git add hello.sh
+git commit -m "bad(hello): unwanted change"
+git revert --no-edit HEAD
 ```
 
-When I tried to move on to the next part of the exercise I realized that I couldn't complete it
-properly as the exercise stupidly does not expect anyone to reset --hard but only to ever git 
-revert. I am going to get creative.
+The subject next asks for the unwanted commit to remain visible through an `oops` tag, followed by
+resetting the branch to `v1`, inspecting the deleted history, and finally pruning the unreferenced
+objects.
 
 ```bash
 git reflog
-git cherry-pick 085f094
 git tag oops
-git checkout v1
+git reset --hard v1
 git log --all --oneline
 git tag -d oops
 git reflog expire --expire=now --all
@@ -284,7 +282,7 @@ git push
 
 ### Task 08: blobs, trees and commits
 
-This task explores git's internal object model using `git cat-file`.
+This task explores Git's internal object model using `git cat-file`.
 
 First we inspect the commit object itself:
 
@@ -308,15 +306,15 @@ We encapsulate the pattern for exploring the lib subtree and the `hello.sh` blob
 
 ```bash
 # Identify the current tree
-git cat-file -p HEAD^{tree}
+git cat-file -p 'HEAD^{tree}'
 
 # Explore the 'lib' subdirectory tree
-LIB_TREE=$(git ls-tree HEAD | grep 'lib' | awk '{print $3}')
-git cat-file -p $LIB_TREE
+LIB_TREE=$(git ls-tree -d HEAD -- lib | awk '{print $3}')
+git cat-file -p "$LIB_TREE"
 
 # Read the content of hello.sh via its blob hash
-HELLO_BLOB=$(git ls-tree -r HEAD | grep 'hello.sh' | awk '{print $3}')
-git cat-file -p $HELLO_BLOB
+HELLO_BLOB=$(git ls-tree -r HEAD -- lib/hello.sh | awk '{print $3}')
+git cat-file -p "$HELLO_BLOB"
 ```
 
 ```bash
@@ -326,10 +324,10 @@ git commit -m "docs(work): add encapsulated solution for blobs, trees and commit
 
 ### Task 09: Branching and Merging
 
-We create a `greet` branch as a reference point, then do all the work on `main`.
+We create and switch to the `greet` feature branch:
 
 ```bash
-git branch -c greet
+git switch -c greet
 ```
 
 We add a `greeter.sh` library to `lib/` with a `Greeter()` function:
@@ -355,20 +353,27 @@ git add lib/hello.sh
 git commit -m "refactor(hello): refactor hello.sh to use greeter.sh"
 ```
 
-We add an intentionally useless comment to the Makefile as required by the exercise:
+We add the explanatory comment required by the exercise to the Makefile:
 
 ```bash
 sed -i '1i# Ensure it runs the updated lib/hello.sh file' Makefile
-git add . && git commit -m "docs: add useless comment to Makefile"
+git add Makefile
+git commit -m "docs: explain Makefile target"
 ```
 
-We use `git diff greet` to review all changes made on `main` since the branch point.
+We return to `main` and compare the three exercise files across the diverged branches:
 
-Finally we add a README and check the full graph:
+```bash
+git switch main
+git diff main..greet -- Makefile lib/hello.sh lib/greeter.sh
+```
+
+Finally, we add the requested README on `main` and inspect the full graph:
 
 ```bash
 echo "This is the Hello World example from the git project." > README.md
-git add . && git commit -m "docs: add README.md"
+git add README.md
+git commit -m "docs: add README.md"
 git log --all --oneline --graph --decorate
 ```
 
@@ -376,11 +381,12 @@ git log --all --oneline --graph --decorate
 
 #### Merge Main into Greet Branch
 
-We switch to `greet` and merge `main` into it. Since `greet` had not diverged,
-this is a fast-forward — git simply advances the branch pointer.
+We record the current `greet` tip so it can be restored for the later rebase demonstration, then
+merge `main` into it. Both branches have unique commits, so Git creates a merge commit.
 
 ```bash
 git switch greet
+greet_before_merge=$(git rev-parse HEAD)
 git merge main
 ```
 
@@ -389,44 +395,60 @@ git merge main
 Back on `main`, we overwrite `hello.sh` with an interactive version:
 
 ```bash
+git switch main
+cat <<'EOF' > lib/hello.sh
 #!/bin/bash
 
 echo "What's your name"
 read my_name
 
 echo "Hello, $my_name"
+EOF
 ```
 
 ```bash
 git add . && git commit -m "feat: make hello.sh interactive"
 ```
 
-We then switch back to `greet` and attempt to merge `main`:
+We then switch back to `greet` and merge `main`:
 
 ```bash
 git switch greet
 git merge main
 ```
 
-No conflict arises. This is a flaw in the exercise: the instruction to merge
-`main` into `greet` at the start of this task eliminated any divergence. Since
-`greet` had no independent changes to `lib/hello.sh` after that first merge,
-the second merge was yet another fast-forward. A conflict requires both branches
-to have independently modified the same file since their common ancestor.
+This produces the expected conflict: `greet` changed `hello.sh` to use the greeter library while
+`main` replaced it with the interactive implementation. During a merge of `main` into `greet`,
+`main` is the `theirs` side, so accepting the required `main` version and committing the resolution
+looks like this:
+
+```bash
+git checkout --theirs lib/hello.sh
+git add lib/hello.sh
+git commit -m "fix: resolve hello script merge conflict"
+```
 
 #### Rebasing Greet Branch
 
-We go back to the point before the initial merge, resetting `greet` to where it
-was before the task began:
+We return `greet` to the tip recorded before the initial merge, then replay its commits on top of
+the latest `main`:
 
 ```bash
 git switch greet
-git reset --hard 6b6187a
+git reset --hard "$greet_before_merge"
 git rebase main
 ```
 
-This replays any commits unique to `greet` on top of `main`'s latest commit,
-resulting in a linear history.
+The `hello.sh` change conflicts again during the rebase. Here, `theirs` refers to the feature commit
+being replayed, so we retain the greeter-based implementation and continue:
+
+```bash
+git checkout --theirs lib/hello.sh
+git add lib/hello.sh
+GIT_EDITOR=true git rebase --continue
+```
+
+This replays the commits unique to `greet` on top of `main`, resulting in a linear history.
 
 #### Merging Greet into Main
 
@@ -437,8 +459,8 @@ git switch main
 git merge greet
 ```
 
-Because `greet` is now a direct descendant of `main`'s HEAD (thanks to the
-rebase), this merge is a fast-forward and produces no merge commit.
+Because `greet` is now a direct descendant of `main`'s `HEAD`, this merge is a fast-forward and
+produces no merge commit.
 
 #### Understanding Fast-Forwarding and the Difference Between Merging and Rebasing
 
@@ -505,7 +527,7 @@ git switch --track origin/greet
 Finally we add a second remote called `backup` and push both branches to it:
 
 ```bash
-git remote add backup /home/stefan/repositories/zone01/git/work/hello
+git remote add backup ../hello
 git push backup main
 git push backup greet
 ```
@@ -553,10 +575,8 @@ from it.
 
 ### Task 13: Merge Conflict Demo
 
-Task 10 failed to produce a conflict because the exercise instructed us to merge
-`main` into `greet` before making any diverging changes, leaving no independent
-history on `greet` to conflict with. This task demonstrates that we do
-understand how merge conflicts work by constructing a proper one.
+This supplemental task constructs a small, standalone merge conflict. It keeps a compact example in
+the preserved exercise history alongside the complete merge-and-rebase sequence from Task 10.
 
 We create a new branch `conflict-demo` and modify `lib/hello.sh` to add a
 goodbye line:
@@ -612,9 +632,9 @@ git commit -m "fix: resolve merge conflict combining farewell messages"
 The resulting graph shows a true merge commit with two parents:
 
 ```
-*   d0a10ac (HEAD -> main) fix: resolve merge conflict combining farewell messages
+*   1067c1b (HEAD -> main) fix: resolve merge conflict combining farewell messages
 |\
-| * 286ab62 (conflict-demo) feat: add goodbye message to hello.sh
-* | b352bce feat: add pleasant farewell to hello.sh
+| * 4deeb4b (conflict-demo) feat: add goodbye message to hello.sh
+* | 08349e3 feat: add pleasant farewell to hello.sh
 |/
 ```

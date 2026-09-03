@@ -1,8 +1,10 @@
 #!/bin/bash
+# Run from within work/hello.
 
-git checkout 3bb32cf
+first_snapshot=$(git rev-list --max-parents=0 HEAD)
+git switch --detach "$first_snapshot"
 cat hello.sh
-git checkout main~1
+git switch --detach main~1
 cat hello.sh
 git switch main
 cat hello.sh

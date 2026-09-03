@@ -2,13 +2,15 @@
 # Task 02: Git commits to commit
 
 # 1. Initial Setup
-mkdir -p hello && cd hello
+mkdir -p hello
+cd hello || exit 1
 echo "Hello, World" > hello.sh
 git init
 
 # 2. Branch Normalization (Fixing 'master' to 'main')
 git config --global init.defaultBranch main
 git branch -m main
+git status --short
 
 # 3. First Logic Update (Modular Script)
 echo '#!/bin/bash' > hello.sh
@@ -44,8 +46,7 @@ git commit -m "feat(hello): initial hello world script"
 git switch main
 # Rebase main onto the new initial commit
 # git rebase temp-root (Conflict resolved manually in hello.sh)
-git branch -d temp-root
-
-# Clean up status
-git add hello.sh
 # git rebase --continue
+
+# Clean up the temporary branch after the rebase completes.
+# git branch -d temp-root
