@@ -1,0 +1,26 @@
+name: Verify coursework
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  shell:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Parse exercise scripts
+        run: bash -n work/*.sh
+
+      - name: Lint exercise scripts
+        run: shellcheck -S warning work/*.sh
+
+      - name: Check whitespace
+        run: git diff --check
